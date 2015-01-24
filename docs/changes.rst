@@ -2,7 +2,10 @@ Version History
 ===============
 
 0.4
-  * Added an initial South migration.
+  * Fix a deprecated celery import path.
+  * Add support for newer versions of Django, and drop support for older ones.
+    We now support 1.4 and 1.5.
+  * Add an initial South migration.
 
 .. warning::
 

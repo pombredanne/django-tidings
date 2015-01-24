@@ -231,14 +231,30 @@ class Event(object):
                           ', '.join('%s' for e in exclude))
             params.extend(e.id for e in exclude)
 
+        def get_fields(model):
+            if hasattr(model._meta, '_fields'):
+                # For django versions < 1.6
+                return model._meta._fields()
+            else:
+                # For django versions >= 1.6
+                return model._meta.fields
+
+        model_to_fields = dict((m, [f.get_attname() for f in get_fields(m)])
+                               for m in [User, Watch])
+        query_fields = [
+            'u.{0}'.format(field) for field in model_to_fields[User]]
+        query_fields.extend([
+            'w.{0}'.format(field) for field in model_to_fields[Watch]])
+
         query = (
-            'SELECT u.*, w.* '
+            'SELECT {fields} '
             'FROM tidings_watch w '
             'LEFT JOIN auth_user u ON u.id=w.user_id {joins} '
             'WHERE {wheres} '
             'AND (length(w.email)>0 OR length(u.email)>0) '
             'AND w.is_active '
             'ORDER BY u.email DESC, w.email DESC').format(
+            fields=', '.join(query_fields),
             joins=' '.join(joins),
             wheres=' AND '.join(wheres))
         # IIRC, the DESC ordering was something to do with the placement of
@@ -249,7 +265,7 @@ class Event(object):
         # same function to union already-list-enclosed pairs from individual
         # events.
         return _unique_by_email((u, [w]) for u, w in
-                                multi_raw(query, params, [User, Watch]))
+                                multi_raw(query, params, [User, Watch], model_to_fields))
 
     @classmethod
     def _watches_belonging_to_user(cls, user_or_email, object_id=None,

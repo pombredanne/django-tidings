@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-tidings',
-    version='0.3',
+    version='0.4',
     description='Framework for asynchronous email notifications from Django',
     long_description=open('README.rst').read() + \
                      # Hack symbol names out of Sphinx directives:
@@ -25,8 +25,8 @@ setup(
     tests_require=[
         'jingo',
         'fabric',
-        'django_nose',
-        'djcelery',
+        'django-nose',
+        'django-celery',
         'mock',
         'South'],
     classifiers = [
